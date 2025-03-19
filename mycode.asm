@@ -11,81 +11,154 @@
     prompt db "Choose the operation to solve (1-4): $"
     msg_input1 db "Enter your first number : $"
     msg_input2 db "Enter your second number : $"
-    newline db 0x0D, 0x0A, "$"
+    msg_result db "Your result is: $"
     msg_exit db "Quitting your program....", 0x0D, 0x0A, "$"
+    newline db 0x0D, 0x0A, "$"
     num1 db ?
     num2 db ?
+    result db ?
     operation db ?
 
 .code
 main:
-    ; Set up the data segment
     mov ax, @data
     mov ds, ax
 
-    ; Display the calculator menu
-    displayMenu:
-        ; Print header
-        mov ah, 09h
-        lea dx, msg1
-        int 21h
+displayMenu:
+    ; Hi?n th? menu
+    mov ah, 09h
+    lea dx, msg1
+    int 21h
 
-        ; Print options
-        lea dx, msg2
-        int 21h
-        lea dx, msg3
-        int 21h
-        lea dx, msg4
-        int 21h
-        lea dx, msg5
-        int 21h
-        lea dx, msg6
-        int 21h
+    lea dx, msg2
+    int 21h
+    lea dx, msg3
+    int 21h
+    lea dx, msg4
+    int 21h
+    lea dx, msg5
+    int 21h
+    lea dx, msg6
+    int 21h
 
-        ; Prompt for operation choice
-        lea dx, prompt
-        int 21h
-        call getChoice
+    ; Nh?p l?a ch?n ph�p to�n
+    lea dx, prompt
+    int 21h
+    call getChoice
+    
 
-        ; Check if the user wants to exit
-        cmp operation, '5'
-        je quitProgram
+    cmp operation, '5'
+    je quitProgram
+    
+    ; Xuong dong
+    lea dx, newline
+    mov ah, 09h
+    int 21h
 
-        ; Get first number
-        lea dx, msg_input1
-        int 21h
-        call getNumber
-        mov al, num1 ; Store num1 in AL
+    ; Nh?p s? th? nh?t
+    lea dx, msg_input1
+    int 21h
+    call getNumber
+    mov num1, al  ; L�u s? th? nh?t
+    
+    ; Xuong dong
+    lea dx, newline
+    mov ah, 09h
+    int 21h
+    
+    ; Nh?p s? th? hai
+    lea dx, msg_input2
+    int 21h
+    call getNumber
+    mov num2, al  ; L�u s? th? hai   
+    
+    lea dx, newline
+    mov ah, 09h
+    int 21h
 
-        ; Get second number
-        lea dx, msg_input2
-        int 21h
-        call getNumber
-        mov bl, num2 ; Store num2 in BL
+    ; X? l? c�c ph�p to�n
+    cmp operation, '1'
+    je addNumbers
+    cmp operation, '2'
+    je subtractNumbers
+    cmp operation, '3'
+    je multiplyNumbers
+    cmp operation, '4'
+    je divideNumbers
 
-        ; Here you can add your operations later
-        ; Just go back to the menu for now
-        jmp displayMenu
+    jmp displayMenu  ; N?u kh�ng h?p l?, quay l?i menu
 
     getChoice:
-        ; Get user choice for the operation
         mov ah, 01h
         int 21h
-        mov operation, al ; Store the operation choice in variable
+        mov operation, al
         ret
-
+    
     getNumber:
-        ; Get user input for a number (single digit input for simplicity)
         mov ah, 01h
         int 21h
-        sub al, '0'   ; Convert ASCII to integer
-        mov num1, al  ; Store input in num1 (for first number)
+        cmp al, 0Dh  ; Ki hieu enter
+        je getNumber  ; Nhap lai
+        sub al, '0'
         ret
-
+    
+    addNumbers:
+        mov al, num1
+        add al, num2
+        mov result, al
+        call printResult
+        jmp displayMenu
+    
+    subtractNumbers:
+        mov al, num1
+        sub al, num2
+        mov result, al
+        call printResult
+        jmp displayMenu
+    
+    multiplyNumbers:
+        mov al, num1
+        mov bl, num2
+        mul bl  ; AL = AL * BL
+        mov result, al
+        call printResult
+        jmp displayMenu
+    
+    divideNumbers:
+        mov al, num1
+        mov ah, 0    ; X�a AH �? tr�nh l?i chia
+        mov bl, num2
+        cmp bl, 0
+        je displayMenu  ; Tr�nh chia cho 0
+        div bl         ; AL = AL / BL (th��ng s?), AH = d�
+        mov result, al
+        call printResult
+        jmp displayMenu
+    
+    printResult:
+        ; Xu?ng d?ng
+        lea dx, newline
+        mov ah, 09h
+        int 21h
+    
+        ; In th�ng b�o k?t qu?
+        lea dx, msg_result
+        int 21h
+    
+        ; In k?t qu? (s? ��n gi?n, 0-9)
+        mov dl, result
+        add dl, '0'  ; Chuy?n sang ASCII
+        mov ah, 02h
+        int 21h
+    
+        ; Xu?ng d?ng
+        lea dx, newline
+        mov ah, 09h
+        int 21h
+        ret
     quitProgram:
         lea dx, msg_exit
         mov ah, 09h
         int 21h
-        ; Exit the program
         mov ah, 4Ch
         int 21h

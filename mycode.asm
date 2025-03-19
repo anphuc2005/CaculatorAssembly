@@ -41,7 +41,7 @@ displayMenu:
     lea dx, msg6
     int 21h
 
-    ; Nh?p l?a ch?n phép toán
+    ; Nh?p l?a ch?n phï¿½p toï¿½n
     lea dx, prompt
     int 21h
     call getChoice
@@ -59,7 +59,7 @@ displayMenu:
     lea dx, msg_input1
     int 21h
     call getNumber
-    mov num1, al  ; Lýu s? th? nh?t
+    mov num1, al  ; Lï¿½u s? th? nh?t
     
     ; Xuong dong
     lea dx, newline
@@ -70,13 +70,13 @@ displayMenu:
     lea dx, msg_input2
     int 21h
     call getNumber
-    mov num2, al  ; Lýu s? th? hai   
+    mov num2, al  ; Lï¿½u s? th? hai   
     
     lea dx, newline
     mov ah, 09h
     int 21h
 
-    ; X? l? các phép toán
+    ; X? l? cï¿½c phï¿½p toï¿½n
     cmp operation, '1'
     je addNumbers
     cmp operation, '2'
@@ -86,7 +86,7 @@ displayMenu:
     cmp operation, '4'
     je divideNumbers
 
-    jmp displayMenu  ; N?u không h?p l?, quay l?i menu
+    jmp displayMenu  ; N?u khï¿½ng h?p l?, quay l?i menu
 
     getChoice:
         mov ah, 01h
@@ -126,11 +126,11 @@ displayMenu:
     
     divideNumbers:
         mov al, num1
-        mov ah, 0    ; Xóa AH ð? tránh l?i chia
+        mov ah, 0    ; Xï¿½a AH ï¿½? trï¿½nh l?i chia
         mov bl, num2
         cmp bl, 0
-        je displayMenu  ; Tránh chia cho 0
-        div bl         ; AL = AL / BL (thýõng s?), AH = dý
+        je displayMenu  ; Trï¿½nh chia cho 0
+        div bl         ; AL = AL / BL (thï¿½ï¿½ng s?), AH = dï¿½
         mov result, al
         call printResult
         jmp displayMenu
@@ -141,11 +141,11 @@ displayMenu:
         mov ah, 09h
         int 21h
     
-        ; In thông báo k?t qu?
+        ; In thï¿½ng bï¿½o k?t qu?
         lea dx, msg_result
         int 21h
     
-        ; In k?t qu? (s? ðõn gi?n, 0-9)
+        ; In k?t qu? (s? ï¿½ï¿½n gi?n, 0-9)
         mov dl, result
         add dl, '0'  ; Chuy?n sang ASCII
         mov ah, 02h
@@ -156,7 +156,6 @@ displayMenu:
         mov ah, 09h
         int 21h
         ret
-    
     quitProgram:
         lea dx, msg_exit
         mov ah, 09h

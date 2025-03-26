@@ -82,20 +82,22 @@ getChoice:
 
 addNumbers:
     add ax, bx
-    call outputDec
+    ;call outputDec
     ;jo overflow
-    ;call printResult
+    call printResult
     jmp displayMenu
 
 subtractNumbers:
     sub ax, bx
-    jo overflow
+    ;call outputDec
+    ;jo overflow
     call printResult
     jmp displayMenu
 
 multiplyNumbers:
     imul bx
-    jo overflow
+    ;call outputDec
+    ;jo overflow
     call printResult
     jmp displayMenu
 
@@ -104,6 +106,8 @@ divideNumbers:
     je displayMenu
     cwd
     idiv bx
+    ;call outputDec
+    ;jo overflow
     call printResult
     jmp displayMenu
 
@@ -114,11 +118,13 @@ overflow:
     jmp displayMenu
 
 printResult:
+    push ax   ; Lýu giá tr? AX
     lea dx, newline
     mov ah, 09h
     int 21h
     lea dx, msg_result
     int 21h
+    pop ax    ; L?y l?i giá tr? AX trý?c khi in
     call outputDec
     lea dx, newline
     mov ah, 09h
@@ -203,12 +209,17 @@ divLoop:
     inc cx
     cmp ax, 0
     jne divLoop
+    
+    ;mov dl, 0x0A   ; Chuy?n sang ký t? Line Feed (0x0A)
+    ;mov ah, 2
+    ;int 21h         ; In ký t? xu?ng dòng
 
     mov ah, 2
 printLoop:
     pop dx
     add dl, 30h
-    int 21h
+    mov ah, 2
+    int 21h         ; In ký t?
     loop printLoop
 
     pop dx

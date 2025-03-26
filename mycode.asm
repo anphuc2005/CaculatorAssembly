@@ -8,15 +8,12 @@
     msg4 db "3. Multiplication", 0x0D, 0x0A, "$"
     msg5 db "4. Divide", 0x0D, 0x0A, "$"
     msg6 db "5. Exit", 0x0D, 0x0A, "$"
-    prompt db "Choose the operation to solve (1-4): $"
-    msg_input1 db "Enter your first number : $"
-    msg_input2 db "Enter your second number : $"
-    msg_result db "Your result is: $"
-    msg_exit db "Quitting your program....", 0x0D, 0x0A, "$"
+    prompt db "Choose the operation (1-4): $"
+    msg_input1 db "Enter first number: $"
+    msg_input2 db "Enter second number: $"
+    msg_result db "Result: $"
+    msg_exit db "Exiting...", 0x0D, 0x0A, "$"
     newline db 0x0D, 0x0A, "$"
-    num1 db ?
-    num2 db ?
-    result db ?
     operation db ?
 
 .code
@@ -25,11 +22,9 @@ main:
     mov ds, ax
 
 displayMenu:
-    ; Hi?n th? menu
     mov ah, 09h
     lea dx, msg1
     int 21h
-
     lea dx, msg2
     int 21h
     lea dx, msg3
@@ -40,43 +35,35 @@ displayMenu:
     int 21h
     lea dx, msg6
     int 21h
-
-    ; Nh?p l?a ch?n phï¿½p toï¿½n
     lea dx, prompt
     int 21h
-    call getChoice
-    
 
+    call getChoice
     cmp operation, '5'
     je quitProgram
-    
-    ; Xuong dong
+
     lea dx, newline
     mov ah, 09h
     int 21h
 
-    ; Nh?p s? th? nh?t
     lea dx, msg_input1
     int 21h
-    call getNumber
-    mov num1, al  ; Lï¿½u s? th? nh?t
-    
-    ; Xuong dong
-    lea dx, newline
-    mov ah, 09h
-    int 21h
-    
-    ; Nh?p s? th? hai
-    lea dx, msg_input2
-    int 21h
-    call getNumber
-    mov num2, al  ; Lï¿½u s? th? hai   
-    
+    call inputDec
+    push ax  ; Lýu s? th? nh?t vào stack
+
     lea dx, newline
     mov ah, 09h
     int 21h
 
-    ; X? l? cï¿½c phï¿½p toï¿½n
+    lea dx, msg_input2
+    int 21h
+    call inputDec
+    push ax  ; Lýu s? th? hai vào stack
+
+    ; Ch?n phép toán
+    pop bx  ; L?y s? th? hai t? stack
+    pop ax  ; L?y s? th? nh?t t? stack
+
     cmp operation, '1'
     je addNumbers
     cmp operation, '2'
@@ -85,80 +72,149 @@ displayMenu:
     je multiplyNumbers
     cmp operation, '4'
     je divideNumbers
+    jmp displayMenu
 
-    jmp displayMenu  ; N?u khï¿½ng h?p l?, quay l?i menu
+getChoice:
+    mov ah, 01h
+    int 21h
+    mov operation, al
+    ret
 
-    getChoice:
-        mov ah, 01h
-        int 21h
-        mov operation, al
-        ret
+addNumbers:
+    add ax, bx
+    call outputDec
+    ;jo overflow
+    ;call printResult
+    jmp displayMenu
+
+subtractNumbers:
+    sub ax, bx
+    jo overflow
+    call printResult
+    jmp displayMenu
+
+multiplyNumbers:
+    imul bx
+    jo overflow
+    call printResult
+    jmp displayMenu
+
+divideNumbers:
+    cmp bx, 0
+    je displayMenu
+    cwd
+    idiv bx
+    call printResult
+    jmp displayMenu
+
+overflow:
+    lea dx, newline
+    mov ah, 09h
+    int 21h
+    jmp displayMenu
+
+printResult:
+    lea dx, newline
+    mov ah, 09h
+    int 21h
+    lea dx, msg_result
+    int 21h
+    call outputDec
+    lea dx, newline
+    mov ah, 09h
+    int 21h
+    ret
+
+quitProgram:
+    lea dx, msg_exit
+    mov ah, 09h
+    int 21h
+    mov ah, 4Ch
+    int 21h
+
+inputDec proc
+    push bx
+    push cx
+    push dx
+    xor bx, bx
+    xor cx, cx
     
-    getNumber:
-        mov ah, 01h
-        int 21h
-        cmp al, 0Dh  ; Ki hieu enter
-        je getNumber  ; Nhap lai
-        sub al, '0'
-        ret
-    
-    addNumbers:
-        mov al, num1
-        add al, num2
-        mov result, al
-        call printResult
-        jmp displayMenu
-    
-    subtractNumbers:
-        mov al, num1
-        sub al, num2
-        mov result, al
-        call printResult
-        jmp displayMenu
-    
-    multiplyNumbers:
-        mov al, num1
-        mov bl, num2
-        mul bl  ; AL = AL * BL
-        mov result, al
-        call printResult
-        jmp displayMenu
-    
-    divideNumbers:
-        mov al, num1
-        mov ah, 0    ; Xï¿½a AH ï¿½? trï¿½nh l?i chia
-        mov bl, num2
-        cmp bl, 0
-        je displayMenu  ; Trï¿½nh chia cho 0
-        div bl         ; AL = AL / BL (thï¿½ï¿½ng s?), AH = dï¿½
-        mov result, al
-        call printResult
-        jmp displayMenu
-    
-    printResult:
-        ; Xu?ng d?ng
-        lea dx, newline
-        mov ah, 09h
-        int 21h
-    
-        ; In thï¿½ng bï¿½o k?t qu?
-        lea dx, msg_result
-        int 21h
-    
-        ; In k?t qu? (s? ï¿½ï¿½n gi?n, 0-9)
-        mov dl, result
-        add dl, '0'  ; Chuy?n sang ASCII
-        mov ah, 02h
-        int 21h
-    
-        ; Xu?ng d?ng
-        lea dx, newline
-        mov ah, 09h
-        int 21h
-        ret
-    quitProgram:
-        lea dx, msg_exit
-        mov ah, 09h
-        int 21h
-        mov ah, 4Ch
-        int 21h
+    mov ah, 1
+    int 21h
+    cmp al, '-'
+    je negative
+    cmp al, '0'
+    jl inputDec
+    cmp al, '9'
+    jg inputDec
+
+convert:
+    and ax, 000Fh
+    push ax
+    mov ax, 10
+    mul bx
+    mov bx, ax
+    pop ax
+    add bx, ax
+
+    mov ah, 1
+    int 21h
+    cmp al, 13
+    jne convert
+
+    mov ax, bx
+    or cx, cx
+    je done
+    neg ax
+
+done:
+    pop dx
+    pop cx
+    pop bx
+    ret
+
+negative:
+    mov cx, 1
+    int 21h
+    jmp convert
+inputDec endp
+
+outputDec proc
+    push bx
+    push cx
+    push dx
+    cmp ax, 0
+    jge convertToStack
+    push ax
+    mov dl, '-'
+    mov ah, 2
+    int 21h
+    pop ax
+    neg ax
+
+convertToStack:
+    xor cx, cx
+    mov bx, 10
+
+divLoop:
+    xor dx, dx
+    div bx
+    push dx
+    inc cx
+    cmp ax, 0
+    jne divLoop
+
+    mov ah, 2
+printLoop:
+    pop dx
+    add dl, 30h
+    int 21h
+    loop printLoop
+
+    pop dx
+    pop cx
+    pop bx
+    ret
+outputDec endp
+
+end main

@@ -23,10 +23,11 @@ main:
     mov ax, @data
     mov ds, ax
 displayMenu:
+    ;Hien thi messenger
     call clearScreen
     mov ah, 09h
-    lea dx, msg1
-    int 21h
+    lea dx, msg1 ; Goi den messenger do
+    int 21h      ; Cau lenh in ra man hinh
     lea dx, msg2
     int 21h
     lea dx, msg3
@@ -43,31 +44,32 @@ displayMenu:
     int 21h
     lea dx, prompt
     int 21h
-    
+    ; Goi ham getChoice de lay lua chon
     call getChoice
     cmp operation, '7'
     je quitProgram
-    
+    ; Giong endl trong c++
     lea dx, newline
     mov ah, 09h
     int 21h
-    
+    ; Luu so co nhieu chu so vao trong stack
     lea dx, msg_input1
     int 21h
     call inputDec
-    push ax  ; Save first number to stack 
+    push ax  ; Luu so dau vao trong stack
     
     lea dx, newline
     mov ah, 09h
     int 21h
     
 getSecondNumber:
+    ; In ra messenger input2 va goi den de luu so co nhieu chu so
     lea dx, msg_input2
     mov ah, 09h
     int 21h
     call inputDec
     
-    ; Check if second number is zero for division and modulus operations
+    ; Kiem tra neu chon phep chia hoac modulo thi xem so 2 co bang 0
     cmp operation, '4'
     je checkDivZero
     cmp operation, '6'
@@ -77,7 +79,7 @@ getSecondNumber:
 checkDivZero:
     cmp ax, 0
     jne continueOperation
-    ; Show error and ask for input again
+    ; Yeu cau nhap lai
     lea dx, newline
     mov ah, 09h
     int 21h
@@ -86,10 +88,10 @@ checkDivZero:
     jmp getSecondNumber
     
 continueOperation:
-    push ax  ; Save second number to stack
+    push ax  ; Luu so thu 2 da nhap vao stack
     ; Select operation
-    pop bx  ; Get second number from stack
-    pop ax  ; Get first number from stack
+    pop bx  ; Lay so thu 2 ra khoi stack
+    pop ax  ; Lay so thu 1 ra khoi stack
     
     cmp operation, '1'
     je addNumbers
@@ -99,9 +101,9 @@ continueOperation:
     je multiplyNumbers
     cmp operation, '4'
     je divideNumbers
-    cmp operation, '5'   ; S?a: Thay d?i t? '6' thành '5' cho phép tính luy th?a
+    cmp operation, '5'   
     je powerNumbers
-    cmp operation, '6'   ; S?a: Ðây là cho phép l?y ph?n du (modulus)
+    cmp operation, '6'   
     je modulusNumbers
     jmp displayMenu
     
@@ -193,7 +195,7 @@ printResult:
     int 21h
     lea dx, msg_result
     int 21h
-    pop ax    ; Restore AX value before printing
+    pop ax    ;Khoi phuc lai thanh ghi AX cho lan su dung tiep
     call outputDec
     lea dx, newline
     mov ah, 09h
@@ -201,19 +203,18 @@ printResult:
     ret
     
 calculatePower:
-    ; AX = base, BX = exponent
-    push cx     ; Save registers
+    push cx     ; Luu thanh ghi cx va dx
     push dx
     
-    mov cx, bx  ; Move exponent to CX for counting
+    mov cx, bx  ; Truyen gia tri so thu 2 (mu cua luy thua) tu thanh ghi bx vao cx
     cmp cx, 0
     je powerZero
     
-    cmp cx, 1   ; Thêm: Ki?m tra tru?ng h?p s? mu = 1
+    cmp cx, 1   ; Kiem tra truong hop mu = 1
     je powerDone
     
-    dec cx      ; Decrement because first multiplication is unnecessary
-    mov dx, ax  ; Save original base value
+    dec cx      ; Giam so mu di 1 don vi
+    mov dx, ax  ; Luu gia tri da nhan vao dx
     
 powerLoop:
     cmp cx, 0
@@ -223,10 +224,10 @@ powerLoop:
     jmp powerLoop
     
 powerZero:
-    mov ax, 1   ; Any number raised to power 0 is 1
+    mov ax, 1   ; Neu mu = 0 thi in ra 1
     
 powerDone:
-    pop dx      ; Restore registers
+    pop dx      ; Giai phong du lieu thanh ghi
     pop cx
     ret
     
@@ -236,7 +237,7 @@ quitProgram:
     int 21h
     mov ah, 4Ch
     int 21h
-    
+; Doan nay la cach luu so nguyen lon, Phuc voi Hai copy tren mang, khong hieu    
 inputDec proc
     push bx
     push cx
@@ -307,7 +308,7 @@ printLoop:
     pop dx
     add dl, 30h
     mov ah, 2
-    int 21h         ; Print character
+    int 21h         
     loop printLoop
     pop dx
     pop cx

@@ -237,7 +237,8 @@ quitProgram:
     int 21h
     mov ah, 4Ch
     int 21h
-; Doan nay la cach luu so nguyen lon, Phuc voi Hai copy tren mang, khong hieu    
+    
+;luu cac gia tri vao bx, moi lan nhap se nhap vao ax => Thuc hien BX = BX*10 + AX. Den khi nhap enter thi chuyen ket qua ve AX                                                                      
 inputDec proc
     push bx
     push cx
@@ -305,7 +306,7 @@ divLoop:
     
     mov ah, 2
 printLoop:
-    pop dx
+    pop dx                  
     add dl, 30h
     mov ah, 2
     int 21h         
